@@ -91,6 +91,9 @@ Route::group(['middleware' => ['token.valid', 'auth:sanctum']], function() {
   Route::prefix('hotels')->group(function () {
       Route::post('/', [App\Http\Controllers\HotelController::class, 'index']);
       Route::put('/', [App\Http\Controllers\HotelController::class, 'store']);
+        
+      Route::get('/reference-data', [App\Http\Controllers\HotelController::class, 'formReferenceData']); // Получить справочники для формы
+
       Route::get('/direction/{directionId}', [App\Http\Controllers\HotelController::class, 'searchByDirection']);
       Route::get('/resort/{resortId}', [App\Http\Controllers\HotelController::class, 'searchByResort']);
       Route::get('/{id}', [App\Http\Controllers\HotelController::class, 'show']);

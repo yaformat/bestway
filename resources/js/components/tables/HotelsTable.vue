@@ -7,13 +7,7 @@
 
         </VCol>
         <VCol cols="12" sm="8" class="text-end text-right">
-          <ArchiveToggleButton
-            :isTrashedView="isTrashedView"
-            :trashedCount="trashedCount"
-            :toggleTrashedView="() => toggleTrashedView(getItems)"
-            @update:isTrashedView="isTrashedView = $event"
-          />
-           <VBtn size="small" class="ml-2" :to="{ name: 'hotel-add' }">
+           <VBtn class="ml-2" :to="{ name: 'hotel-add' }">
                 <VIcon start icon="mdi-plus" />
                 Создать отель
            </VBtn>
@@ -114,7 +108,7 @@
             </VBtn>
           </div>
           <div v-else>
-            <VBtn @click="openEditDialog(item)" size="small" variant="outlined">
+            <VBtn :to="{ name: 'hotel-edit-id', params: { id: item.id } }"  size="small" variant="outlined">
               <VIcon icon="mdi-pencil-outline" />
             </VBtn>
             <VBtn icon variant="text" size="small" color="medium-emphasis">

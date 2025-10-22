@@ -45,7 +45,7 @@ class HotelController extends BaseController
         
         // Устанавливаем фильтры
         $response->setFilters([
-            'direction_id' => FilterHelper::createFilter('Направление', 'checkboxes')
+            'direction_id' => FilterHelper::createFilter('Направление', 'tree')
                 ->setOptions(FilterHelper::getDirectionOptions())
                 ->setMultiple(true)
                 ->setQuickFilter(true, true)
@@ -56,13 +56,7 @@ class HotelController extends BaseController
                 ->setQuickFilter(true)
                 ->toArray(),
             'stars' => FilterHelper::createFilter('Звездность', 'checkboxes')
-                ->setOptions([
-                    ['value' => '5', 'name' => '5 звезд'],
-                    ['value' => '4', 'name' => '4 звезды'],
-                    ['value' => '3', 'name' => '3 звезды'],
-                    ['value' => '2', 'name' => '2 звезды'],
-                    ['value' => '1', 'name' => '1 звезда'],
-                ])
+                ->setOptions(FilterHelper::getHotelStarsOptions())
                 ->setMultiple(true)
                 ->setQuickFilter(true, true)
                 ->toArray(),
@@ -125,6 +119,46 @@ class HotelController extends BaseController
         $result = $this->hotelRepository->getHotelWithDetails($id);
         $response = new \App\Http\Responses\HotelElement($result);
         return ApiResponse::success($response);
+    }
+
+    /**
+     * Получает справочники для формы отеля
+     */
+    public function formReferenceData(Request $request)
+    {
+        $hotelId = $request->input('hotel_id');
+        
+        // Получаем базовые справочники
+        $referenceData = [
+            'directions' => FilterHelper::getDirectionOptionsFlat(),
+            'resorts' => FilterHelper::getResortOptions(),
+            'rest_types' => FilterHelper::getRestTypeOptions(),
+            'stars' => FilterHelper::getHotelStarsOptions(),
+            'currencies' => FilterHelper::getCurrencyOptions(),
+            'facilities' => FilterHelper::getHotelFacilities(),
+        ];
+        
+        // Если редактируем отель, добавляем связанные данные
+        if ($hotelId) {
+            try {
+                $hotel = $this->hotelRepository->getHotelWithDetails($hotelId);
+                
+                // Получаем курорты для выбранного направления
+                if ($hotel->direction_id) {
+                    $referenceData['resorts'] = FilterHelper::getResortOptions($hotel->direction_id);
+                }
+                
+                // Добавляем связанные данные отеля
+                $referenceData['hotel_rest_types'] = $hotel->restTypes->pluck('id')->toArray();
+                $referenceData['hotel_facilities'] = $hotel->facilities ?? [];
+                
+            } catch (\Exception $e) {
+                // Если отель не найден, возвращаем ошибку
+                return ApiResponse::error('Отель не найден', 404);
+            }
+        }
+        
+        return ApiResponse::success($referenceData);
     }
 
     /**
