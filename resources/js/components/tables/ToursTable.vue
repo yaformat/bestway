@@ -125,6 +125,12 @@
                     </template>
                     <VListItemTitle>Программа</VListItemTitle>
                   </VListItem>
+                  <VListItem @click="copyTour(item)">
+                    <template #prepend>
+                      <VIcon icon="mdi-content-copy" />
+                    </template>
+                    <VListItemTitle>Копировать тур</VListItemTitle>
+                  </VListItem>
                   <VListItem @click="confirmArchive(item.id)">
                     <template #prepend>
                       <VIcon icon="mdi-archive-outline" />
@@ -297,6 +303,7 @@ const {
 // Дополнительные диалоги
 const isProgramDialogVisible = ref(false)
 const selectedTour = ref(null)
+const isCopying = ref(false)
 
 const props = defineProps({
   isActive: Boolean
@@ -331,6 +338,45 @@ const saveProgram = async () => {
     await getItems()
   } catch (error) {
     console.error('Ошибка сохранения программы:', error)
+  }
+}
+
+// Метод копирования тура
+const copyTour = async (tour) => {
+  if (!confirm(`Скопировать тур "${tour.name}"?`)) {
+    return
+  }
+  
+  isCopying.value = true
+  try {
+    const response = await itemsStore.copy(tour.id)
+    
+    // Показываем уведомление об успешном копировании
+    if (window.showNotification) {
+      window.showNotification(`Тур "${tour.name}" успешно скопирован`, 'success')
+    } else {
+      // Fallback если нет глобального уведомления
+      console.log(`Тур "${tour.name}" успешно скопирован`)
+    }
+    
+    // Обновляем список
+    await getItems()
+    
+    // Опционально: открываем диалог редактирования скопированного тура
+    if (response?.data?.id) {
+      // Можно сразу открыть скопированный тур для редактирования
+      // openEditDialog(response.data)
+    }
+  } catch (error) {
+    console.error('Ошибка копирования тура:', error)
+    
+    if (window.showNotification) {
+      window.showNotification('Ошибка при копировании тура', 'error')
+    } else {
+      console.error('Ошибка при копировании тура')
+    }
+  } finally {
+    isCopying.value = false
   }
 }
 

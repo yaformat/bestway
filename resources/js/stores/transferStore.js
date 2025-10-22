@@ -1,4 +1,4 @@
-// src/stores/TransferStore.js
+// src/stores/transferStore.js
 import { createStore } from './createStore'
 import Transfer from '@/models/Transfer'
 
