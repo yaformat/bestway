@@ -1,0 +1,84 @@
+// Write your overrides
+/* src/styles/app-data-table.scss */
+
+/* Основной контейнер */
+.app-data-table.v-table {
+  border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 1px 2px rgba(var(--v-theme-on-surface), 0.06);
+}
+
+/* Шапка таблицы */
+.app-data-table.v-table thead {
+  background: rgba(var(--v-theme-on-surface), 0.04);
+}
+
+.app-data-table.v-table th {
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.17px !important;
+  height: 52px;
+  padding: 0 16px !important;
+  color: rgba(var(--v-theme-on-surface), 0.65) !important;
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+/* Тело таблицы */
+.app-data-table.v-table tbody tr {
+  transition: background-color 0.25s ease;
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.app-data-table.v-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.app-data-table.v-table tbody tr:hover {
+  background-color: rgba(var(--v-theme-on-surface), 0.05);
+}
+
+.app-data-table.v-table td {
+  padding: 12px 16px !important;
+  height: 50px;
+  vertical-align: middle;
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+}
+
+/* Кнопки действий */
+.app-data-table.v-table .v-btn {
+  border-radius: 4px;
+  transition: opacity 0.2s;
+}
+
+.app-data-table.v-table .v-btn:hover {
+  opacity: 0.85;
+}
+
+/* Тёмная тема */
+.v-theme--dark .app-data-table.v-table {
+  background: rgb(var(--v-theme-surface));
+}
+
+.v-theme--dark .app-data-table.v-table thead {
+  background: rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.v-theme--dark .app-data-table.v-table tbody tr:hover {
+  background-color: rgba(var(--v-theme-on-surface), 0.1);
+}
+
+.v-theme--dark .app-data-table.v-table th,
+.v-theme--dark .app-data-table.v-table td {
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+}
+
+
+.custom-badge .v-badge__badge {
+  background-color: #ffeb3b!important;
+  color: black!important;
+  text-transform: none;
+  letter-spacing: normal;
+}

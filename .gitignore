@@ -1,0 +1,30 @@
+.DS_store
+.idea
+.env
+.vscode*
+components.d.ts
+resources/js/@iconify/icons-bundle.js
+node_modules
+vendor
+storage/app/public/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+public/build
+public/storage
+public/hot
+public/assets
+public/workbox*
+public/service-worker.js
+public/registerSW.js
+public/manifest*
+# public/bundle*
+# public/manifest*
+# public/registerSW.js
+# public/service-worker.js
+# public/workbox*
+# PHPUnit
+.phpunit.cache
+.phpunit.result.cache
+package.json.backup
