@@ -1,9 +1,14 @@
+DirectionsTable<!-- resources/js/components/tables/DirectionsTable.vue -->
 <template>
   <div>
     <VCardText class="d-flex justify-space-between flex-wrap gap-4">
       <VRow>
         <VCol cols="12" sm="4">
-          <VTextField v-model="searchQuery" density="compact" placeholder="Поиск поставщика" />
+          <VTextField 
+            v-model="searchQuery" 
+            density="compact" 
+            placeholder="Поиск направления" 
+          />
         </VCol>
         <VCol cols="12" sm="8" class="text-end text-right">
           <ArchiveToggleButton
@@ -12,11 +17,14 @@
             :toggleTrashedView="() => toggleTrashedView(getItems)"
             @update:isTrashedView="isTrashedView = $event"
           />
-          <VBtn @click="isCreateDialogVisible = true" class="ml-2">Создать Поставщика</VBtn>
+          <VBtn @click="isCreateDialogVisible = true" class="ml-2">
+            <VIcon start icon="mdi-plus" />
+            Создать направление
+          </VBtn>
         </VCol>
       </VRow>
     </VCardText>
-
+    
     <Filters
       v-model="selectedFilters"
       :filters="dynamicFilters"
@@ -27,10 +35,11 @@
       :sorting-options="dynamicSortingOptions"
       @filtersChange="(changes) => handleFiltersChange(changes, getItems)"
     />
-
+    
     <div v-if="isLoading">
-      <TableSkeletonLoader :rows="5" :headers="headers" :hasNameWithImage="true" />
+      <TableSkeletonLoader :rows="5" :headers="headers" />
     </div>
+    
     <VDataTableServer
       v-else
       v-model:items-per-page="options.itemsPerPage"
@@ -44,19 +53,60 @@
     >
       <!-- Name -->
       <template #item.name="{ item }">
-        <TableNameWithImage :item="item" />
-      </template>
-      <!-- location -->
-      <template #item.location="{ item }">
-        <div>
-          <div v-if="item.location"><span class="text-sm">{{ item.location.name }}</span></div>
+        <div class="d-flex align-center">
+          <VAvatar
+            :image="item.photo?.url"
+            size="32"
+            class="me-3"
+          >
+            <VIcon icon="mdi-map" />
+          </VAvatar>
+          <div>
+            <div class="text-high-emphasis font-weight-medium">
+              {{ item.name }}
+            </div>
+            <div class="text-sm text-medium-emphasis">
+              {{ item.slug }}
+            </div>
+          </div>
         </div>
       </template>
+      
+      <!-- Country -->
+      <template #item.country="{ item }">
+        <VChip size="small" :color="getCountryColor(item.country)">
+          {{ item.country }}
+        </VChip>
+      </template>
+      
+      <!-- Excursions count -->
+      <template #item.excursions_count="{ item }">
+        <VChip size="small" color="primary" variant="outlined">
+          {{ item.excursions_count || 0 }}
+        </VChip>
+      </template>
+      
+      <!-- Status -->
+      <template #item.is_active="{ item }">
+        <VSwitch
+          :model-value="item.is_active"
+          @update:model-value="toggleActive(item.id, $event)"
+          density="compact"
+          inset
+          hide-details
+        />
+      </template>
+      
       <!-- Actions -->
       <template #item.actions="{ item }">
         <div class="text-no-wrap">
           <div v-if="isTrashedView">
-            <VBtn @click="confirmRestore(item.id)" size="small" color="secondary" variant="outlined">
+            <VBtn 
+              @click="confirmRestore(item.id)" 
+              size="small" 
+              color="secondary" 
+              variant="outlined"
+            >
               <VIcon icon="mdi-restore" />
               Восстановить
             </VBtn>
@@ -81,11 +131,12 @@
           </div>
         </div>
       </template>
+      
       <template #bottom>
         <TableFooter :options="options" :total="itemsTotal" />
       </template>
     </VDataTableServer>
-
+    
     <ArchiveDialogs
       ref="dialogsRef"
       :success-dialog-visible="successDialogVisible"
@@ -101,36 +152,36 @@
     <!-- Модальное окно для создания -->
     <EntityDialog
       :isVisible="isCreateDialogVisible"
-      title="Создать поставщика"
+      title="Создать направление"
       submitButtonText="Создать"
       @update:isVisible="isCreateDialogVisible = $event"
-      :onSubmit="createEntity"
+      @onSubmit="createEntity"
     >
-      <SupplierCreateForm :model="newEntity" />
+      <DirectionCreateForm :model="newEntity" />
     </EntityDialog>
-
+    
     <!-- Модальное окно для редактирования -->
     <EntityDialog
       :isVisible="isEditDialogVisible"
-      title="Редактировать поставщика"
+      title="Редактировать направление"
       submitButtonText="Сохранить"
       @update:isVisible="isEditDialogVisible = $event"
-      :onSubmit="updateEntity"
+      @onSubmit="updateEntity"
     >
-      <SupplierEditForm :model="editEntity" />
+      <DirectionEditForm :model="editEntity" />
     </EntityDialog>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { VDataTableServer } from 'vuetify/components'
-import { useSupplierStore } from '@/stores/supplierStore'
+import { useDirectionStore } from '@/stores/directionStore'
 import { useTableFilters } from '@/mixins/useTableFilters'
 import useArchive from '@/mixins/useArchive'
 import useEntityActions from '@/mixins/useEntityActions'
 
-const itemsStore = useSupplierStore()
+const itemsStore = useDirectionStore()
 
 // Используем mixin для фильтров и таблицы
 const {
@@ -158,10 +209,22 @@ const headers = [
   {
     title: 'Название',
     key: 'name',
+    sortable: true,
   },
   {
-    title: 'Локация',
-    key: 'location',
+    title: 'Страна',
+    key: 'country',
+    sortable: true,
+  },
+  {
+    title: 'Экскурсий',
+    key: 'excursions_count',
+    sortable: true,
+  },
+  {
+    title: 'Статус',
+    key: 'is_active',
+    sortable: true,
   },
   {
     title: 'Действия',
@@ -172,11 +235,10 @@ const headers = [
 
 const getItems = async () => {
   isLoading.value = true
-
   try {
     const params = getApiParams({
+      with: ['photo']
     })
-
     const response = await itemsStore.fetchAll(params)
     updateFromApiResponse(response)
   } catch (error) {
@@ -184,9 +246,7 @@ const getItems = async () => {
   } finally {
     isLoading.value = false
   }
-
 }
-
 
 const {
   isCreateDialogVisible,
@@ -196,7 +256,7 @@ const {
   createEntity,
   updateEntity,
   openEditDialog
-} = useEntityActions(itemsStore, 'поставщик', getItems)
+} = useEntityActions(itemsStore, 'направление', getItems)
 
 const {
   isTrashedView,
@@ -217,6 +277,26 @@ const props = defineProps({
   isActive: Boolean
 })
 
+// Методы
+const getCountryColor = (country) => {
+  const colors = {
+    'KG': 'green',
+    'KZ': 'blue',
+    'UZ': 'purple',
+  }
+  return colors[country] || 'grey'
+}
+
+const toggleActive = async (id, status) => {
+  try {
+    await itemsStore.toggleActive(id, status)
+    await getItems()
+  } catch (error) {
+    console.error('Ошибка смены статуса:', error)
+  }
+}
+
+// Watchers
 watch(() => props.isActive, (newVal) => {
   isTrashedView.value = false
   if (newVal) {
@@ -227,13 +307,13 @@ watch(() => props.isActive, (newVal) => {
 watch(() => options.value.itemsPerPage, (newVal, oldVal) => {
   if (newVal !== oldVal) {
     options.value.page = 1
-    getItems(isTrashedView.value)
+    getItems()
   }
 })
 
 watch(() => options.value.page, (newVal, oldVal) => {
   if (newVal !== oldVal) {
-    getItems(isTrashedView.value)
+    getItems()
   }
 })
 

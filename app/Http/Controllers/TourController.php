@@ -153,12 +153,22 @@ class TourController extends BaseController
      */
     public function copy($id, Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        // $request->validate([
+        //     'name' => 'required|string|max:255',
+        // ]);
 
-        $newData = ['name' => $request->name];
+        $newData = ['name' => $request->name ?? 'Новый тур'];
         $copy = $this->tourRepository->copy($id, $newData);
         return ApiResponse::success($copy, 'Тур скопирован', 201);
+    }
+
+    public function toggleActive($id, Request $request)
+    {
+        $result = $this->tourRepository->toggleActive($id);
+        if ($result) {
+            return ApiResponse::success($result, 'Активность элемента изменена');
+        }
+
+        return ApiResponse::error('Action forbidden', 409);
     }
 }

@@ -161,4 +161,14 @@ class TransferController extends BaseController
         $copy = $this->transferRepository->copy($id, $newData);
         return ApiResponse::success($copy, 'Трансфер скопирован', 201);
     }
+
+    public function toggleActive($id, Request $request)
+    {
+        $result = $this->transferRepository->toggleActive($id);
+        if ($result) {
+            return ApiResponse::success($result, 'Активность элемента изменена');
+        }
+
+        return ApiResponse::error('Action forbidden', 409);
+    }
 }

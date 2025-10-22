@@ -16,11 +16,13 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
+        \App\Http\Middleware\SetDomain::class,
         \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+
     ];
 
     /**
@@ -46,8 +48,13 @@ class Kernel extends HttpKernel
    	        \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\DisableCache::class,
             \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\LogRequest::class,
+            //\App\Http\Middleware\LogRequest::class,
             //\App\Http\Middleware\EnsureTokenIsValid::class,
+        ],
+        // Новая группа для API с доменами
+        'domain-api' => [
+            'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
 

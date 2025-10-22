@@ -160,4 +160,14 @@ class ExcursionController extends BaseController
         $copy = $this->excursionRepository->copy($id, $newData);
         return ApiResponse::success($copy, 'Экскурсия скопирована', 201);
     }
+
+    public function toggleActive($id, Request $request)
+    {
+        $result = $this->excursionRepository->toggleActive($id);
+        if ($result) {
+            return ApiResponse::success($result, 'Активность элемента изменена');
+        }
+
+        return ApiResponse::error('Action forbidden', 409);
+    }
 }
