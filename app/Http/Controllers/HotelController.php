@@ -9,6 +9,7 @@ use App\Http\Requests\ItemsListBaseRequest;
 use App\Http\Responses\ItemsListBaseResponse;
 use App\Models\Hotel;
 use App\Repositories\HotelRepository;
+use App\Helpers\FilterHelper;
 
 class HotelController extends BaseController
 {
@@ -29,7 +30,7 @@ class HotelController extends BaseController
         $items = $result->getCollection()->map(function ($item) {
             return (new \App\Http\Responses\HotelElement($item))->toArray();
         });
-
+        
         $response = new ItemsListBaseResponse(
             Hotel::class,
             \App\Presets\Sortings\DefaultSortings::class,
@@ -37,8 +38,82 @@ class HotelController extends BaseController
             $parameters,
             $result
         );
-
-        $response->trashed_count = $this->hotelRepository->trashedCount();
+        
+        // Получение количества удаленных элементов
+        $trashed_count = $this->hotelRepository->trashedCount();
+        $response->trashed_count = $trashed_count;
+        
+        // Устанавливаем фильтры
+        $response->setFilters([
+            'direction_id' => FilterHelper::createFilter('Направление', 'checkboxes')
+                ->setOptions(FilterHelper::getDirectionOptions())
+                ->setMultiple(true)
+                ->setQuickFilter(true, true)
+                ->toArray(),
+            'resort_id' => FilterHelper::createFilter('Курорт', 'checkboxes')
+                ->setOptions(FilterHelper::getResortOptions())
+                ->setMultiple(true)
+                ->setQuickFilter(true)
+                ->toArray(),
+            'stars' => FilterHelper::createFilter('Звездность', 'checkboxes')
+                ->setOptions([
+                    ['value' => '5', 'name' => '5 звезд'],
+                    ['value' => '4', 'name' => '4 звезды'],
+                    ['value' => '3', 'name' => '3 звезды'],
+                    ['value' => '2', 'name' => '2 звезды'],
+                    ['value' => '1', 'name' => '1 звезда'],
+                ])
+                ->setMultiple(true)
+                ->setQuickFilter(true, true)
+                ->toArray(),
+            'rating' => FilterHelper::createFilter('Рейтинг', 'range')
+                ->setRange(0, 5, 0.1)
+                ->setQuickFilter(true)
+                ->toArray(),
+            'price_from' => FilterHelper::createFilter('Цена от', 'range')
+                ->setRange(0, 10000)
+                ->setQuickFilter(true)
+                ->toArray(),
+            'rest_types' => FilterHelper::createFilter('Виды отдыха', 'checkboxes')
+                ->setOptions(FilterHelper::getRestTypeOptions())
+                ->setMultiple(true)
+                ->setQuickFilter(true)
+                ->toArray(),
+            'is_active' => FilterHelper::createFilter('Активные', 'toggle')
+                ->setQuickFilter(true, true)
+                ->toArray(),
+            'only_trashed' => FilterHelper::createFilter("В архиве ({$trashed_count})", 'toggle')
+                ->setQuickFilter(true)
+                ->toArray(),
+            'has_photos' => FilterHelper::createFilter('С фото', 'toggle')
+                ->setQuickFilter(true)
+                ->toArray(),
+            'has_rooms' => FilterHelper::createFilter('С номерами', 'toggle')
+                ->setQuickFilter(true)
+                ->toArray(),
+            'facilities' => FilterHelper::createFilter('Удобства', 'checkboxes')
+                ->setOptions(FilterHelper::getHotelFacilities())
+                ->setMultiple(true)
+                ->setQuickFilter(true)
+                ->toArray(),
+        ]);
+        
+        // Устанавливаем сортировки
+        $response->setSortings([
+            ['value' => 'default', 'label' => 'По-умолчанию'],
+            ['value' => 'name_asc', 'label' => 'По названию (А-Я)'],
+            ['value' => 'name_desc', 'label' => 'По названию (Я-А)'],
+            ['value' => 'stars_desc', 'label' => 'По звездности (убыв.)'],
+            ['value' => 'stars_asc', 'label' => 'По звездности (возр.)'],
+            ['value' => 'rating_desc', 'label' => 'По рейтингу (убыв.)'],
+            ['value' => 'rating_asc', 'label' => 'По рейтингу (возр.)'],
+            ['value' => 'price_asc', 'label' => 'По цене (возр.)'],
+            ['value' => 'price_desc', 'label' => 'По цене (убыв.)'],
+            ['value' => 'created_at_desc', 'label' => 'Сначала новые'],
+            ['value' => 'created_at_asc', 'label' => 'Сначала старые'],
+            ['value' => 'sort_order_asc', 'label' => 'По порядку сортировки'],
+        ]);
+        
         return ApiResponse::success($response);
     }
 
@@ -62,7 +137,6 @@ class HotelController extends BaseController
         $items = $result->getCollection()->map(function ($item) {
             return (new \App\Http\Responses\HotelElement($item))->toArray();
         });
-
         $response = new ItemsListBaseResponse(
             Hotel::class,
             \App\Presets\Sortings\DefaultSortings::class,
@@ -70,7 +144,6 @@ class HotelController extends BaseController
             $parameters,
             $result
         );
-
         return ApiResponse::success($response);
     }
 
@@ -84,7 +157,6 @@ class HotelController extends BaseController
         $items = $result->getCollection()->map(function ($item) {
             return (new \App\Http\Responses\HotelElement($item))->toArray();
         });
-
         $response = new ItemsListBaseResponse(
             Hotel::class,
             \App\Presets\Sortings\DefaultSortings::class,
@@ -92,7 +164,6 @@ class HotelController extends BaseController
             $parameters,
             $result
         );
-
         return ApiResponse::success($response);
     }
 
@@ -119,12 +190,12 @@ class HotelController extends BaseController
 
         $data = $request->all();
         $hotel = $this->hotelRepository->create($data);
-
+        
         // Привязываем виды отдыха
         if (!empty($data['rest_types'])) {
             $hotel->restTypes()->attach($data['rest_types']);
         }
-
+        
         return ApiResponse::success($hotel, 'Отель создан', 201);
     }
 
@@ -151,12 +222,12 @@ class HotelController extends BaseController
 
         $data = $request->all();
         $hotel = $this->hotelRepository->update($id, $data);
-
+        
         // Обновляем виды отдыха
         if (isset($data['rest_types'])) {
             $hotel->restTypes()->sync($data['rest_types']);
         }
-
+        
         return ApiResponse::success($hotel, 'Отель обновлен');
     }
 
@@ -192,7 +263,7 @@ class HotelController extends BaseController
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
-
+        
         $newData = ['name' => $request->name];
         $copy = $this->hotelRepository->copy($id, $newData);
         return ApiResponse::success($copy, 'Отель скопирован', 201);
@@ -204,8 +275,6 @@ class HotelController extends BaseController
         if ($result) {
             return ApiResponse::success($result, 'Активность элемента изменена');
         }
-
         return ApiResponse::error('Action forbidden', 409);
     }
-
 }

@@ -6,6 +6,11 @@ use App\Models\ResourceCategory;
 use App\Models\Stock;
 use App\Models\Kitchen;
 use App\Models\Workshop;
+
+use App\Models\Direction;
+use App\Models\Resort;
+use App\Models\RestType;
+
 use App\Enums\ResourceTypeEnum;
 use App\Helpers\FilterConfig;
 use App\Helpers\CacheHelper;
@@ -101,6 +106,84 @@ class FilterHelper
     public static function getAllCategoriesTree(): array
     {
         return self::getCategoryTree();
+    }
+
+    /**
+     * Получает опции для направлений
+     */
+    public static function getDirectionOptions()
+    {
+        return Direction::active()
+            ->orderBy('name')
+            ->get()
+            ->map(function ($direction) {
+                return [
+                    'value' => $direction->id,
+                    'name' => $direction->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Получает опции для курортов
+     */
+    public static function getResortOptions()
+    {
+        return Resort::active()
+            ->with('direction')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($resort) {
+                return [
+                    'value' => $resort->id,
+                    'name' => $resort->name . ' (' . ($resort->direction->name ?? 'Без направления') . ')'
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Получает опции для видов отдыха
+     */
+    public static function getRestTypeOptions()
+    {
+        return RestType::active()
+            ->orderBy('name')
+            ->get()
+            ->map(function ($restType) {
+                return [
+                    'value' => $restType->id,
+                    'name' => $restType->name
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Получает опции для удобств отеля
+     */
+    public static function getHotelFacilities()
+    {
+        // Возвращаем предопределенный список удобств
+        return [
+            ['value' => 'wifi', 'name' => 'Wi-Fi'],
+            ['value' => 'parking', 'name' => 'Парковка'],
+            ['value' => 'pool', 'name' => 'Бассейн'],
+            ['value' => 'spa', 'name' => 'SPA'],
+            ['value' => 'gym', 'name' => 'Фитнес-центр'],
+            ['value' => 'restaurant', 'name' => 'Ресторан'],
+            ['value' => 'bar', 'name' => 'Бар'],
+            ['value' => 'room_service', 'name' => 'Обслуживание номеров'],
+            ['value' => 'concierge', 'name' => 'Консьерж'],
+            ['value' => 'pet_friendly', 'name' => 'Разрешены животные'],
+            ['value' => 'business_center', 'name' => 'Бизнес-центр'],
+            ['value' => 'meeting_rooms', 'name' => 'Переговорные комнаты'],
+            ['value' => 'laundry', 'name' => 'Прачечная'],
+            ['value' => 'shuttle', 'name' => 'Трансфер'],
+            ['value' => 'beach_access', 'name' => 'Доступ к пляжу'],
+            ['value' => 'ski_storage', 'name' => 'Хранение лыж'],
+        ];
     }
 
     /**
