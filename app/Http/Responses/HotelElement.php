@@ -23,7 +23,8 @@ namespace App\Http\Responses;
  *     @OA\Property(property="min_price", type="number", format="float", nullable=true, description="Минимальная цена"),
  *     @OA\Property(property="photo", ref="#/components/schemas/PhotoElement", nullable=true, description="Основное фото"),
  *     @OA\Property(property="created_at", type="string", format="date-time", description="Дата создания"),
- *     @OA\Property(property="updated_at", type="string", format="date-time", description="Дата обновления")
+ *     @OA\Property(property="updated_at", type="string", format="date-time", description="Дата обновления"),
+ *     @OA\Property(property="deleted_at", type="string", format="date-time", description="Дата удаления")
  * )
  */
 class HotelElement
@@ -57,6 +58,7 @@ class HotelElement
             'photo' => $this->hotel->photo ? (new PhotoElement($this->hotel->photo))->toArray() : null,
             'created_at' => $this->hotel->created_at,
             'updated_at' => $this->hotel->updated_at,
+            'deleted_at' => $this->hotel->deleted_at,
         ];
     }
 

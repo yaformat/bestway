@@ -96,7 +96,7 @@
       <!-- Actions -->
       <template #item.actions="{ item }">
         <div class="text-no-wrap">
-          <div v-if="isTrashedView">
+          <div v-if="item.deleted_at">
             <VBtn 
               @click="confirmRestore(item.id)" 
               size="small" 
