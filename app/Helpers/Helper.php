@@ -5,10 +5,6 @@ namespace App\Helpers;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
-use App\Models\Resource;
-use App\Enums\ResourceUnitEnum;
-use App\Enums\ResourceLosseEnum;
-use App\Enums\StockActionStatusEnum;
 
 use Carbon\Carbon;
 
@@ -76,16 +72,6 @@ class Helper
 {
     const CURRENCY = 'с';
 
-    public static function formatValue(Resource $resource, $value = 0)
-    {
-        if ($resource->unit_factor > 0) {
-            $value /= $resource->unit_factor;
-        }
-        $value = round($value, $resource->round);
-
-        return sprintf('%s %s', $value, $resource->unit_label);
-    }
-
     private static function formatNumber($number = 0, $decimals = 0)
     {
         return number_format($number, $decimals, '.', ' ');
@@ -98,128 +84,12 @@ class Helper
         return self::formatNumber($price, $decimals) . ' ' . self::CURRENCY;
     }
 
-    public static function formatStockValue($value = 0)
-    {
-        $formatted = round($value, 2);
-        if(floor($formatted) == $formatted) {
-            return intval($formatted);
-        } else {
-            // Remove trailing zeros
-            return floatval(number_format($formatted, 2, '.', ''));
-        }
-        return $value;
-    }
-
-    public static function formatPriceObject($price = 0, ResourceUnitEnum $unit = null)
-    {
-        $price = round($price, 3);
-
-        $priceObject = new \StdClass;
-        $priceObject->raw = $price;
-        $priceObject->currency = self::CURRENCY;
-        $priceObject->display = self::formatPrice($price) . (!empty($unit) ? '/'.$unit->getLabel() : '');
-
-        return $priceObject;
-    }
-
-    public static function formatUnitPriceObject($price = 0, $value = 0, ResourceUnitEnum $unit = null, $unit_factor = 0)
-    {
-        if (!$unit_factor || !$value) {
-            $price = 0;
-        } else {
-            $price = $price * $unit_factor;
-            $price = $price / $value;
-        }
-
-        $price = round($price, 3);
-
-        $priceObject = new \StdClass;
-        $priceObject->raw = $price;
-        $priceObject->currency = self::CURRENCY;
-        $priceObject->unit_label = $unit->getLabel();
-        $priceObject->display = self::formatPrice($price) . (!empty($unit) ? '/'.$unit->getLabel() : '');
-
-        return $priceObject;
-    }
-
     public static function formatTimeObject($hours = 0, $minutes = 0)
     {
         return [
             'hours' => intval($hours),
             'minutes' => intval($minutes),
         ];
-    }
-
-    public static function formatLossesObject($value = null, $skip = false)
-    {
-        $losses = [];
-        $value = json_decode($value, true);
-
-        // Check if the value is an array of objects or an associative array
-        if (isset($value[0]) && is_array($value[0]) && isset($value[0]['id'])) {
-            // Convert array of objects to associative array
-            $value = array_reduce($value, function ($acc, $item) {
-                $acc[$item['id']] = $item['value'];
-                return $acc;
-            }, []);
-        }
-
-        foreach (ResourceLosseEnum::toArray() as $losseName => $losse) {
-            $value_ = (isset($value[$losseName])) ? $value[$losseName] : 0;
-
-            if (!$value_ && $skip) continue; 
-
-            $losses[] = [
-                'id' => $losseName,
-                'name' => $losse['label'],
-                'value' => $value_
-            ];
-        }
-
-        return $losses;
-    }
-
-    public static function formatStockValueObject($value = 0, $unit_factor = 1, ResourceUnitEnum $unit = null)
-    {
-        $unit_factor = (float) $unit_factor > 0 ? $unit_factor : 1;
-        
-        $value = $value / $unit_factor;
-
-        $valueObject = new \StdClass;
-        $valueObject->raw = self::formatStockValue($value);
-        $valueObject->unit = $unit;
-        $valueObject->unit_label = (!empty($unit) ? $unit->getLabel() : null);
-        $valueObject->display = $valueObject->raw . (!empty($unit) ? ' '.$unit->getLabel() : '');
-
-        return $valueObject;
-    }
-
-    public static function formatDate($date) {
-        $carbonDate = Carbon::parse($date);
-
-        $dateObject = new \StdClass;
-        $dateObject->raw = $date;
-        $dateObject->day = $carbonDate->locale('ru')->isoFormat('dd');
-        $dateObject->date = $carbonDate->format('d.m');
-        $dateObject->display = $carbonDate->locale('ru')->isoFormat('dd DD.MM');
-    
-        return $dateObject;
-    }
-
-    public static function formatStatusObject(StockActionStatusEnum $status) {
-        if (!$status) return null;
-        
-        $statusObject = new \StdClass;
-        $statusObject->id = $status;
-        $statusObject->name = $status->getLabel();
-
-        $colors = $status->getColors();
-
-        $statusObject->bgcolor = $colors[0];
-        $statusObject->textcolor = $colors[1];
-        $statusObject->bordercolor = $colors[2];
-
-        return $statusObject;
     }
 
     public static function generateUniqueFilename($file): string

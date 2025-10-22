@@ -149,4 +149,14 @@ class DirectionController extends BaseController
         }
         return ApiResponse::error('Невозможно восстановить направление', 409);
     }
+
+    public function toggleActive($id, Request $request)
+    {
+        $result = $this->directionRepository->toggleActive($id);
+        if ($result) {
+            return ApiResponse::success($result, 'Активность элемента изменена');
+        }
+
+        return ApiResponse::error('Action forbidden', 409);
+    }
 }

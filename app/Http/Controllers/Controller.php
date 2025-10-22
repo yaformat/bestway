@@ -105,7 +105,7 @@ class Controller extends BaseController
 
     public function index()
     {
-        return view('application');
+        return view('admin.application');
     }
 
 }

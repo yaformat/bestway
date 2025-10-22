@@ -24,14 +24,6 @@
       class="rounded-0"
       @update:options="options = $event"
     >
-      <!-- organization -->
-      <template #item.organization="{ item }">
-        <div>
-          <div v-if="item.organization">
-            <TableNameWithImage :item="item.organization" />
-          </div>
-        </div>
-      </template>
       <!-- Name -->
       <template #item.full_name="{ item }">
         <UserNameWithImage :user="item" nameKey="full_name" />
@@ -39,10 +31,6 @@
       <!-- email -->
       <template #item.email="{ item }">
         <span class="text-sm">{{ item.email }}</span>
-      </template>
-      <!-- locale -->
-      <template #item.locale="{ item }">
-        <span class="text-sm">{{ item.locale }}</span>
       </template>
       <!-- activity_at -->
       <template #item.activity_at="{ item }">
@@ -102,20 +90,12 @@ const options = ref({
 
 const headers = [
   {
-    title: 'Организация',
-    key: 'organization',
-  },
-  {
     title: 'ФИО',
     key: 'full_name',
   },
   {
     title: 'Email',
     key: 'email',
-  },
-  {
-    title: 'Язык',
-    key: 'locale',
   },
   {
     title: 'Дата активности',

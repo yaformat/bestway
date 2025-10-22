@@ -197,4 +197,15 @@ class HotelController extends BaseController
         $copy = $this->hotelRepository->copy($id, $newData);
         return ApiResponse::success($copy, 'Отель скопирован', 201);
     }
+
+    public function toggleActive($id, Request $request)
+    {
+        $result = $this->hotelRepository->toggleActive($id);
+        if ($result) {
+            return ApiResponse::success($result, 'Активность элемента изменена');
+        }
+
+        return ApiResponse::error('Action forbidden', 409);
+    }
+
 }

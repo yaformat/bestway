@@ -16,5 +16,36 @@ use Illuminate\Support\Facades\Route;
 Route::get('asdasdasdlokijuhy777', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 
 Route::get('/{any}', function () {
-    return view('application');
+    return view('admin.application');
 })->where('any', '^(?!api).*$');
+
+
+
+// Middleware для проверки домена
+// Route::middleware([
+//     // 'web', 
+//     // 'set.domain'
+// ])->group(function () {
+    
+//     // Фронтенд (Blade) - корень сайта
+//     Route::get('/', function () {
+//         return view('front.index');
+//     })->name('home');
+//     // Фронтенд (Blade) - корень сайта
+//     Route::get('/admin', function () {
+//         return view('admin.application');
+//     })->name('admin');
+
+// });
+
+// Route::prefix('admin')->middleware([
+//     // 'web', 
+//     // 'set.domain', 
+//     // 'auth'
+// ])->group(function () {
+
+//     Route::get('/{any}', function () {
+//         return view('admin.application');
+//     })->where('any', '^(?!api).*$');
+
+// });

@@ -134,10 +134,7 @@ class BaseRepository
         if (!empty($parameters->search)) {
             $searchTerm = '%' . $parameters->search . '%';
             $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'like', $searchTerm)
-                  ->orWhereHas('translations', function($subQ) use ($searchTerm) {
-                      $subQ->where('name', 'like', $searchTerm);
-                  });
+                $q->where('name', 'like', $searchTerm);
             });
         }
     }

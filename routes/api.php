@@ -76,8 +76,8 @@ Route::group(['middleware' => ['token.valid', 'auth:sanctum']], function() {
   
   // Направления
   Route::prefix('directions')->group(function () {
-      Route::get('/', [App\Http\Controllers\DirectionController::class, 'index']);
-      Route::post('/', [App\Http\Controllers\DirectionController::class, 'store']);
+      Route::post('/', [App\Http\Controllers\DirectionController::class, 'index']);
+      Route::put('/', [App\Http\Controllers\DirectionController::class, 'store']);
       Route::get('/root', [App\Http\Controllers\DirectionController::class, 'getRootDirections']);
       Route::get('/tree', [App\Http\Controllers\DirectionController::class, 'getDirectionTree']);
       Route::get('/{parentId}/children', [App\Http\Controllers\DirectionController::class, 'getChildDirections']);
@@ -89,8 +89,8 @@ Route::group(['middleware' => ['token.valid', 'auth:sanctum']], function() {
 
   // Отели
   Route::prefix('hotels')->group(function () {
-      Route::get('/', [App\Http\Controllers\HotelController::class, 'index']);
-      Route::post('/', [App\Http\Controllers\HotelController::class, 'store']);
+      Route::post('/', [App\Http\Controllers\HotelController::class, 'index']);
+      Route::put('/', [App\Http\Controllers\HotelController::class, 'store']);
       Route::get('/direction/{directionId}', [App\Http\Controllers\HotelController::class, 'searchByDirection']);
       Route::get('/resort/{resortId}', [App\Http\Controllers\HotelController::class, 'searchByResort']);
       Route::get('/{id}', [App\Http\Controllers\HotelController::class, 'show']);
@@ -98,42 +98,46 @@ Route::group(['middleware' => ['token.valid', 'auth:sanctum']], function() {
       Route::delete('/{id}', [App\Http\Controllers\HotelController::class, 'destroy']);
       Route::post('/{id}/restore', [App\Http\Controllers\HotelController::class, 'restore']);
       Route::post('/{id}/copy', [App\Http\Controllers\HotelController::class, 'copy']);
+      Route::post('/{id}/toggle-active', [App\Http\Controllers\HotelController::class, 'toggleActive']);
   });
 
   // Туры
   Route::prefix('tours')->group(function () {
-      Route::get('/', [App\Http\Controllers\TourController::class, 'index']);
-      Route::post('/', [App\Http\Controllers\TourController::class, 'store']);
+      Route::post('/', [App\Http\Controllers\TourController::class, 'index']);
+      Route::put('/', [App\Http\Controllers\TourController::class, 'store']);
       Route::get('/direction/{directionId}', [App\Http\Controllers\TourController::class, 'searchByDirection']);
       Route::get('/{id}', [App\Http\Controllers\TourController::class, 'show']);
       Route::put('/{id}', [App\Http\Controllers\TourController::class, 'update']);
       Route::delete('/{id}', [App\Http\Controllers\TourController::class, 'destroy']);
       Route::post('/{id}/restore', [App\Http\Controllers\TourController::class, 'restore']);
       Route::post('/{id}/copy', [App\Http\Controllers\TourController::class, 'copy']);
+      Route::post('/{id}/toggle-active', [App\Http\Controllers\TourController::class, 'toggleActive']);
   });
 
   // Экскурсии
   Route::prefix('excursions')->group(function () {
-      Route::get('/', [App\Http\Controllers\ExcursionController::class, 'index']);
-      Route::post('/', [App\Http\Controllers\ExcursionController::class, 'store']);
+      Route::post('/', [App\Http\Controllers\ExcursionController::class, 'index']);
+      Route::put('/', [App\Http\Controllers\ExcursionController::class, 'store']);
       Route::get('/direction/{directionId}', [App\Http\Controllers\ExcursionController::class, 'searchByDirection']);
       Route::get('/{id}', [App\Http\Controllers\ExcursionController::class, 'show']);
       Route::put('/{id}', [App\Http\Controllers\ExcursionController::class, 'update']);
       Route::delete('/{id}', [App\Http\Controllers\ExcursionController::class, 'destroy']);
       Route::post('/{id}/restore', [App\Http\Controllers\ExcursionController::class, 'restore']);
       Route::post('/{id}/copy', [App\Http\Controllers\ExcursionController::class, 'copy']);
+      Route::post('/{id}/toggle-active', [App\Http\Controllers\ExcursionController::class, 'toggleActive']);
   });
 
   // Трансферы
   Route::prefix('transfers')->group(function () {
-      Route::get('/', [App\Http\Controllers\TransferController::class, 'index']);
-      Route::post('/', [App\Http\Controllers\TransferController::class, 'store']);
+      Route::post('/', [App\Http\Controllers\TransferController::class, 'index']);
+      Route::put('/', [App\Http\Controllers\TransferController::class, 'store']);
       Route::get('/type/{type}', [App\Http\Controllers\TransferController::class, 'searchByType']);
       Route::get('/{id}', [App\Http\Controllers\TransferController::class, 'show']);
       Route::put('/{id}', [App\Http\Controllers\TransferController::class, 'update']);
       Route::delete('/{id}', [App\Http\Controllers\TransferController::class, 'destroy']);
       Route::post('/{id}/restore', [App\Http\Controllers\TransferController::class, 'restore']);
       Route::post('/{id}/copy', [App\Http\Controllers\TransferController::class, 'copy']);
+      Route::post('/{id}/toggle-active', [App\Http\Controllers\TransferController::class, 'toggleActive']);
   });
 
   

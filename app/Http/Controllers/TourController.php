@@ -161,4 +161,14 @@ class TourController extends BaseController
         $copy = $this->tourRepository->copy($id, $newData);
         return ApiResponse::success($copy, 'Тур скопирован', 201);
     }
+
+    public function toggleActive($id, Request $request)
+    {
+        $result = $this->tourRepository->toggleActive($id);
+        if ($result) {
+            return ApiResponse::success($result, 'Активность элемента изменена');
+        }
+
+        return ApiResponse::error('Action forbidden', 409);
+    }
 }
