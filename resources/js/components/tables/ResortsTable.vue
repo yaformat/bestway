@@ -1,4 +1,4 @@
-<!-- resources/js/components/tables/ExcursionsTable.vue -->
+<!-- resources/js/components/tables/ResortsTable.vue -->
 <template>
   <div>
     <VCardText class="d-flex justify-space-between flex-wrap gap-4">
@@ -15,7 +15,7 @@
           />
           <VBtn @click="isCreateDialogVisible = true" class="ml-2">
             <VIcon start icon="mdi-plus" />
-            Создать экскурсию
+            Создать курорт
           </VBtn>
         </VCol>
       </VRow>
@@ -55,7 +55,7 @@
             size="32"
             class="me-3"
           >
-            <VIcon icon="mdi-walk" />
+            <VIcon icon="mdi-map-marker" />
           </VAvatar>
           <div>
             <div class="text-high-emphasis font-weight-medium">
@@ -68,24 +68,25 @@
         </div>
       </template>
       
-      <!-- Duration -->
-      <template #item.duration_hours="{ item }">
-        <VChip size="small" color="primary" variant="outlined">
-          {{ item.duration_hours }} ч.
-        </VChip>
-      </template>
-      
-      <!-- Price -->
-      <template #item.price_from="{ item }">
-        <div class="text-high-emphasis font-weight-medium">
-          {{ formatCurrency(item.price_from) }}
-        </div>
-      </template>
-      
       <!-- Type -->
       <template #item.type="{ item }">
         <VChip size="small" :color="getTypeColor(item.type)">
+          <VIcon start :icon="getTypeIcon(item.type)" />
           {{ getTypeLabel(item.type) }}
+        </VChip>
+      </template>
+      
+      <!-- Altitude -->
+      <template #item.altitude="{ item }">
+        <div class="text-sm">
+          {{ item.altitude }} м
+        </div>
+      </template>
+      
+      <!-- Hotels count -->
+      <template #item.hotels_count="{ item }">
+        <VChip size="small" color="primary" variant="outlined">
+          {{ item.hotels_count || 0 }} отелей
         </VChip>
       </template>
       
@@ -122,11 +123,29 @@
               <VIcon size="24" icon="mdi-dots-vertical" />
               <VMenu activator="parent">
                 <VList>
-                  <VListItem @click="openProgramDialog(item)">
+                  <VListItem @click="openHotelsDialog(item)">
                     <template #prepend>
-                      <VIcon icon="mdi-map" />
+                      <VIcon icon="mdi-bed" />
                     </template>
-                    <VListItemTitle>Программа</VListItemTitle>
+                    <VListItemTitle>Отели</VListItemTitle>
+                  </VListItem>
+                  <VListItem @click="copyResort(item)" :disabled="isCopying && copyingResortId === item.id">
+                    <template #prepend>
+                      <VProgressCircular
+                        v-if="isCopying && copyingResortId === item.id"
+                        indeterminate
+                        size="20"
+                        width="2"
+                        class="mr-2"
+                      />
+                      <VIcon 
+                        v-else
+                        icon="mdi-content-copy" 
+                      />
+                    </template>
+                    <VListItemTitle>
+                      {{ isCopying && copyingResortId === item.id ? 'Копирование...' : 'Копировать' }}
+                    </VListItemTitle>
                   </VListItem>
                   <VListItem @click="confirmArchive(item.id)">
                     <template #prepend>
@@ -161,33 +180,32 @@
     <!-- Модальные окна -->
     <EntityDialog
       :isVisible="isCreateDialogVisible"
-      title="Создать экскурсию"
+      title="Создать курорт"
       submitButtonText="Создать"
       @update:isVisible="isCreateDialogVisible = $event"
       @onSubmit="createEntity"
     >
-      <ExcursionCreateForm :model="newEntity" />
+      <ResortCreateForm :model="newEntity" />
     </EntityDialog>
     
     <EntityDialog
       :isVisible="isEditDialogVisible"
-      title="Редактировать экскурсию"
+      title="Редактировать курорт"
       submitButtonText="Сохранить"
       @update:isVisible="isEditDialogVisible = $event"
       @onSubmit="updateEntity"
     >
-      <ExcursionEditForm :model="editEntity" />
+      <ResortEditForm :model="editEntity" />
     </EntityDialog>
     
     <EntityDialog
-      :isVisible="isProgramDialogVisible"
-      title="Программа экскурсии"
-      submitButtonText="Сохранить"
-      @update:isVisible="isProgramDialogVisible = $event"
-      @onSubmit="saveProgram"
+      :isVisible="isHotelsDialogVisible"
+      title="Отели курорта"
+      submitButtonText="Закрыть"
+      @update:isVisible="isHotelsDialogVisible = $event"
       size="large"
     >
-      <ExcursionProgramForm :model="selectedExcursion" />
+      <ResortHotelsForm :model="selectedResort" />
     </EntityDialog>
   </div>
 </template>
@@ -195,12 +213,12 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { VDataTableServer } from 'vuetify/components'
-import { useExcursionStore } from '@/stores/excursionStore'
+import { useResortStore } from '@/stores/resortStore'
 import { useTableFilters } from '@/mixins/useTableFilters'
 import useArchive from '@/mixins/useArchive'
 import useEntityActions from '@/mixins/useEntityActions'
 
-const itemsStore = useExcursionStore()
+const itemsStore = useResortStore()
 
 // Используем mixin для фильтров и таблицы
 const {
@@ -236,18 +254,18 @@ const headers = [
     sortable: true,
   },
   {
-    title: 'Длительность',
-    key: 'duration_hours',
-    sortable: true,
-  },
-  {
-    title: 'Цена от',
-    key: 'price_from',
-    sortable: true,
-  },
-  {
     title: 'Тип',
     key: 'type',
+    sortable: true,
+  },
+  {
+    title: 'Высота',
+    key: 'altitude',
+    sortable: true,
+  },
+  {
+    title: 'Отели',
+    key: 'hotels_count',
     sortable: true,
   },
   {
@@ -285,7 +303,7 @@ const {
   createEntity,
   updateEntity,
   openEditDialog
-} = useEntityActions(itemsStore, 'экскурсия', getItems)
+} = useEntityActions(itemsStore, 'курорт', getItems)
 
 const {
   isTrashedView,
@@ -303,35 +321,48 @@ const {
 } = useArchive()
 
 // Дополнительные диалоги
-const isProgramDialogVisible = ref(false)
-const selectedExcursion = ref(null)
+const isHotelsDialogVisible = ref(false)
+const selectedResort = ref(null)
+const isCopying = ref(false)
+const copyingResortId = ref(null)
 
 const props = defineProps({
   isActive: Boolean
 })
 
 // Методы
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount)
-}
-
 const getTypeColor = (type) => {
   const colors = {
-    'individual': 'primary',
-    'group': 'success',
-    'combined': 'warning',
+    'ski': 'primary',
+    'beach': 'success',
+    'spa': 'warning',
+    'eco': 'info',
+    'cultural': 'error',
+    'adventure': 'purple',
   }
   return colors[type] || 'grey'
 }
 
+const getTypeIcon = (type) => {
+  const icons = {
+    'ski': 'mdi-ski',
+    'beach': 'mdi-beach',
+    'spa': 'mdi-spa',
+    'eco': 'mdi-leaf',
+    'cultural': 'mdi-bank',
+    'adventure': 'mdi-hiking',
+  }
+  return icons[type] || 'mdi-map-marker'
+}
+
 const getTypeLabel = (type) => {
   const labels = {
-    'individual': 'Индивидуальная',
-    'group': 'Групповая',
-    'combined': 'Комбинированная',
+    'ski': 'Горнолыжный',
+    'beach': 'Пляжный',
+    'spa': 'SPA',
+    'eco': 'Эко',
+    'cultural': 'Культурный',
+    'adventure': 'Приключенческий',
   }
   return labels[type] || type
 }
@@ -345,18 +376,40 @@ const toggleActive = async (id, status) => {
   }
 }
 
-const openProgramDialog = (excursion) => {
-  selectedExcursion.value = excursion
-  isProgramDialogVisible.value = true
+const openHotelsDialog = (resort) => {
+  selectedResort.value = resort
+  isHotelsDialogVisible.value = true
 }
 
-const saveProgram = async () => {
+const copyResort = async (resort) => {
+  if (!confirm(`Скопировать курорт "${resort.name}"?`)) {
+    return
+  }
+  
+  isCopying.value = true
+  copyingResortId.value = resort.id
+  
   try {
-    await itemsStore.saveProgram(selectedExcursion.value.id, selectedExcursion.value.program)
-    isProgramDialogVisible.value = false
+    await itemsStore.copy(resort.id)
+    
+    if (window.showNotification) {
+      window.showNotification(`Курорт "${resort.name}" успешно скопирован`, 'success')
+    } else {
+      console.log(`Курорт "${resort.name}" успешно скопирован`)
+    }
+    
     await getItems()
   } catch (error) {
-    console.error('Ошибка сохранения программы:', error)
+    console.error('Ошибка копирования курорта:', error)
+    
+    if (window.showNotification) {
+      window.showNotification('Ошибка при копировании курорта', 'error')
+    } else {
+      console.error('Ошибка при копировании курорта')
+    }
+  } finally {
+    isCopying.value = false
+    copyingResortId.value = null
   }
 }
 

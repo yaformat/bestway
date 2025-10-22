@@ -91,6 +91,9 @@ Route::group(['middleware' => ['token.valid', 'auth:sanctum']], function() {
   Route::prefix('hotels')->group(function () {
       Route::post('/', [App\Http\Controllers\HotelController::class, 'index']);
       Route::put('/', [App\Http\Controllers\HotelController::class, 'store']);
+        
+      Route::get('/reference-data', [App\Http\Controllers\HotelController::class, 'formReferenceData']); // Получить справочники для формы
+
       Route::get('/direction/{directionId}', [App\Http\Controllers\HotelController::class, 'searchByDirection']);
       Route::get('/resort/{resortId}', [App\Http\Controllers\HotelController::class, 'searchByResort']);
       Route::get('/{id}', [App\Http\Controllers\HotelController::class, 'show']);
@@ -99,6 +102,18 @@ Route::group(['middleware' => ['token.valid', 'auth:sanctum']], function() {
       Route::post('/{id}/restore', [App\Http\Controllers\HotelController::class, 'restore']);
       Route::post('/{id}/copy', [App\Http\Controllers\HotelController::class, 'copy']);
       Route::post('/{id}/toggle-active', [App\Http\Controllers\HotelController::class, 'toggleActive']);
+  });
+
+  // Курорты
+  Route::prefix('resorts')->group(function () {
+      Route::post('/', [App\Http\Controllers\ResortController::class, 'index']);
+      Route::put('/', [App\Http\Controllers\ResortController::class, 'store']);
+      Route::get('/{id}', [App\Http\Controllers\ResortController::class, 'show']);
+      Route::put('/{id}', [App\Http\Controllers\ResortController::class, 'update']);
+      Route::delete('/{id}', [App\Http\Controllers\ResortController::class, 'destroy']);
+      Route::post('/{id}/restore', [App\Http\Controllers\ResortController::class, 'restore']);
+      Route::post('/{id}/copy', [App\Http\Controllers\ResortController::class, 'copy']);
+      Route::post('/{id}/toggle-active', [App\Http\Controllers\ResortController::class, 'toggleActive']);
   });
 
   // Туры

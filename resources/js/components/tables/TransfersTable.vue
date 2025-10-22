@@ -4,11 +4,7 @@
     <VCardText class="d-flex justify-space-between flex-wrap gap-4">
       <VRow>
         <VCol cols="12" sm="4">
-          <VTextField 
-            v-model="searchQuery" 
-            density="compact" 
-            placeholder="Поиск трансфера" 
-          />
+
         </VCol>
         <VCol cols="12" sm="8" class="text-end text-right">
           <ArchiveToggleButton

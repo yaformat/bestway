@@ -4,20 +4,10 @@
     <VCardText class="d-flex justify-space-between flex-wrap gap-4">
       <VRow>
         <VCol cols="12" sm="4">
-          <VTextField 
-            v-model="searchQuery" 
-            density="compact" 
-            placeholder="Поиск отеля" 
-          />
+
         </VCol>
         <VCol cols="12" sm="8" class="text-end text-right">
-          <ArchiveToggleButton
-            :isTrashedView="isTrashedView"
-            :trashedCount="trashedCount"
-            :toggleTrashedView="() => toggleTrashedView(getItems)"
-            @update:isTrashedView="isTrashedView = $event"
-          />
-           <VBtn size="small" class="ml-2" :to="{ name: 'hotel-add' }">
+           <VBtn class="ml-2" :to="{ name: 'hotel-add' }">
                 <VIcon start icon="mdi-plus" />
                 Создать отель
            </VBtn>
@@ -106,7 +96,7 @@
       <!-- Actions -->
       <template #item.actions="{ item }">
         <div class="text-no-wrap">
-          <div v-if="isTrashedView">
+          <div v-if="item.deleted_at">
             <VBtn 
               @click="confirmRestore(item.id)" 
               size="small" 
@@ -118,7 +108,7 @@
             </VBtn>
           </div>
           <div v-else>
-            <VBtn @click="openEditDialog(item)" size="small" variant="outlined">
+            <VBtn :to="{ name: 'hotel-edit-id', params: { id: item.id } }"  size="small" variant="outlined">
               <VIcon icon="mdi-pencil-outline" />
             </VBtn>
             <VBtn icon variant="text" size="small" color="medium-emphasis">
