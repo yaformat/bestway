@@ -12,7 +12,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 import DefineOptions from 'unplugin-vue-define-options/vite'
 import laravel from 'laravel-vite-plugin'
 
+const baseUrl = process.env.VITE_BASE_URL || '/admin/'
+
 export default defineConfig({
+  base: baseUrl,
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -21,7 +24,7 @@ export default defineConfig({
       manifest: {
         name: 'BestWay',
         short_name: 'BestWay',
-        start_url: '/',
+        start_url: baseUrl,
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#4f46e5', // основной цвет темы (Vuetify primary?)

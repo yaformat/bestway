@@ -15,37 +15,32 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('asdasdasdlokijuhy777', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 
-Route::get('/{any}', function () {
-    return view('admin.application');
-})->where('any', '^(?!api).*$');
+// Route::get('/{any}', function () {
+//     return view('admin.application');
+// })->where('any', '^(?!api).*$');
 
 
 
-// Middleware для проверки домена
-// Route::middleware([
-//     // 'web', 
-//     // 'set.domain'
-// ])->group(function () {
+Route::middleware([
+    // 'web', 
+    // 'set.domain'
+])->group(function () {
     
-//     // Фронтенд (Blade) - корень сайта
-//     Route::get('/', function () {
-//         return view('front.index');
-//     })->name('home');
-//     // Фронтенд (Blade) - корень сайта
-//     Route::get('/admin', function () {
-//         return view('admin.application');
-//     })->name('admin');
+    // Фронтенд (Blade) - корень сайта
+    Route::get('/', function () {
+        return view('front.index');
+    })->name('home');
 
-// });
+});
 
-// Route::prefix('admin')->middleware([
-//     // 'web', 
-//     // 'set.domain', 
-//     // 'auth'
-// ])->group(function () {
+Route::prefix('admin')->group(function () {
+    // Маршрут для корня админки
+    Route::get('/', function () {
+        return view('admin.application');
+    });
 
-//     Route::get('/{any}', function () {
-//         return view('admin.application');
-//     })->where('any', '^(?!api).*$');
-
-// });
+    // Маршрут для всех вложенных путей
+    Route::get('/{any}', function () {
+        return view('admin.application');
+    })->where('any', '^(?!api).*$');
+});
