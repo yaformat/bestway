@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
             // DirectionSeeder::class,
             // RestTypeSeeder::class,
             // ResortSeeder::class,
-            // HotelSeeder::class,
+            HotelSeeder::class,
             // HotelRoomSeeder::class,
             // BookingPeriodSeeder::class,
             // HotelPriceSeeder::class,

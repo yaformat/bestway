@@ -1,6 +1,6 @@
 /* eslint-disable import/order */
 import '@/@iconify/icons-bundle'
-import App from '@/App.vue'
+import App from '@/admin/App.vue'
 import ability from '@/plugins/casl/ability'
 import layoutsPlugin from '@/plugins/layouts'
 import VueLazyLoad from 'vue3-lazyload'
@@ -45,7 +45,7 @@ app.use(abilitiesPlugin, ability, {
 })
 
 //Инициализация данных после монтирования приложения
-import { useGlobalDataStore } from './stores/globalDataStore'
+import { useGlobalDataStore } from '../stores/globalDataStore'
 const globalDataStore = useGlobalDataStore()
 globalDataStore.fetchData()
 

@@ -139,8 +139,8 @@ import { useUserProfileStore } from '@/stores/userProfileStore';
 
 import { useTheme } from 'vuetify'
 import { staticPrimaryColor } from '@/plugins/vuetify/theme'
-import { useThemeConfig } from '@core/composable/useThemeConfig'
-import { AppContentLayoutNav } from '@layouts/enums'
+import { useThemeConfig } from '@/@core/composable/useThemeConfig'
+import { AppContentLayoutNav } from '@/@layouts/enums'
 import { themeConfig } from '@themeConfig'
 
 

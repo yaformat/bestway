@@ -1,11 +1,11 @@
 <script setup>
-import { useLayouts } from '@layouts'
-import { config } from '@layouts/config'
-import { can } from '@layouts/plugins/casl'
+import { useLayouts } from '@/@layouts'
+import { config } from '@/@layouts/config'
+import { can } from '@/@layouts/plugins/casl'
 import {
   getComputedNavLinkToProp,
   isNavLinkActive,
-} from '@layouts/utils'
+} from '@/@layouts/utils'
 
 const props = defineProps({
   item: {

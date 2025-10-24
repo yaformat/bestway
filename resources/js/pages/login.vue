@@ -6,12 +6,12 @@ import axiosIns from '@/plugins/axios'
 
 import authV1LoginMaskDark from '@images/pages/auth-v1-login-mask-dark.png'
 import authV1LoginMaskLight from '@images/pages/auth-v1-login-mask-light.png'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+import { VNodeRenderer } from '@/@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import {
   emailValidator,
   requiredValidator,
-} from '@validators'
+} from '@/@core/utils/validators'
 
 const isPasswordVisible = ref(false)
 const authV1ThemeLoginMask = useGenerateImageVariant(authV1LoginMaskLight, authV1LoginMaskDark)

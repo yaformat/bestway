@@ -1,4 +1,4 @@
-import { RouteTransitions, Skins } from '@core/enums'
+import { RouteTransitions, Skins } from '@/@core/enums'
 
 export const defineThemeConfig = userConfig => {
   const localStorageTheme = localStorage.getItem(`${userConfig.app.title}-theme`)

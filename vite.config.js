@@ -107,7 +107,12 @@ export default defineConfig({
     }),
 
     laravel({
-      input: ['resources/js/main.js'],
+      input: [
+        'resources/js/admin/main.js',
+        'resources/css/admin.scss',
+        'resources/js/front/main.js',
+        'resources/css/front.scss',
+      ],
       refresh: true,
     }),
 
@@ -151,7 +156,7 @@ export default defineConfig({
     alias: {
       '@core-scss': fileURLToPath(new URL('./resources/styles/@core', import.meta.url)),
       '@': fileURLToPath(new URL('./resources/js', import.meta.url)),
-      '@themeConfig': fileURLToPath(new URL('./themeConfig.js', import.meta.url)),
+      '@themeConfig': fileURLToPath(new URL('./resources/js/admin/themeConfig.js', import.meta.url)),
       '@core': fileURLToPath(new URL('./resources/js/@core', import.meta.url)),
       '@layouts': fileURLToPath(new URL('./resources/js/@layouts', import.meta.url)),
       '@images': fileURLToPath(new URL('./resources/images/', import.meta.url)),
@@ -167,7 +172,7 @@ export default defineConfig({
     outDir: 'public/build',
     rollupOptions: {
       output: {
-        inlineDynamicImports: true, // inline dynamic imports
+        //inlineDynamicImports: true, // inline dynamic imports
         entryFileNames: `bundle-[hash].js`, // итоговое имя файла
       },
     },

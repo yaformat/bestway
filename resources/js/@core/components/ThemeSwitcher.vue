@@ -1,5 +1,5 @@
 <script setup>
-import { useThemeConfig } from '@core/composable/useThemeConfig'
+import { useThemeConfig } from '@/@core/composable/useThemeConfig'
 
 const props = defineProps({
   themes: {

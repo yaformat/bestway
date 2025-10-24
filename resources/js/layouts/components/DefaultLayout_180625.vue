@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import navItems from '@/navigation/vertical'
-import { useThemeConfig } from '@core/composable/useThemeConfig'
+import { useThemeConfig } from '@/@core/composable/useThemeConfig'
 import { useDisplay } from 'vuetify'
 
 // Components
@@ -11,7 +11,7 @@ import Footer from '@/layouts/components/Footer.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 
 // @layouts plugin
-import { VerticalNavLayout } from '@layouts'
+import { VerticalNavLayout } from '@/@layouts'
 
 const { appRouteTransition } = useThemeConfig()
 const { mobile } = useDisplay()

@@ -1,9 +1,8 @@
 <?php 
-
 namespace App\Traits;
-
 use App\Models\Photo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 
 trait HasPhotos
 {
@@ -11,7 +10,7 @@ trait HasPhotos
      * Флаг для отслеживания необходимости удаления фото
      */
     protected bool $shouldDeletePhoto = false;
-
+    
     /**
      * ID фотографий для привязки
      */
@@ -74,11 +73,9 @@ trait HasPhotos
 
         // Убираем пустые значения и дубликаты
         $photoIds = array_unique(array_filter($photoIds));
-
         if (empty($photoIds)) {
             return;
         }
-
 
         $photos = Photo::whereIn('id', $photoIds)
             ->where('entity_id', 0)
@@ -96,7 +93,7 @@ trait HasPhotos
         }
 
         $attachedIds = $photos->pluck('id')->toArray();
-        
+
         // Удаляем старые фото
         Photo::whereNotIn('id', $attachedIds)
             ->where('entity_id', $this->id)
@@ -128,7 +125,7 @@ trait HasPhotos
             if (!\File::exists($newFolder)) {
                 \File::makeDirectory($newFolder, 0755, true);
             }
-        
+
             \File::move(
                 $oldFolder.$photo->filename,
                 $newFolder.$photo->filename
@@ -190,7 +187,7 @@ trait HasPhotos
             $model->append('photo');
         });
     }
-    
+
     /**
      * Получает первое фото модели
      */
@@ -204,15 +201,16 @@ trait HasPhotos
      */
     public function getPhotosDeletedAttribute()
     {
-        return $this->photos()->whereNotNull('deleted_at');
+        return $this->photos()->whereNotNull('deleted_at')->get();
     }
-    
+
     /**
-     * Получает активные фото
+     * Получает активные фото - ИСПРАВЛЕНО!
      */
     public function getPhotosAttribute()
     {
-        return $this->photos()->whereNull('deleted_at');
+        // Возвращаем КОЛЛЕКЦИЮ, а не Relation
+        return $this->photos()->whereNull('deleted_at')->get();
     }
 
     /**

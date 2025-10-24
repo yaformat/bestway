@@ -1,6 +1,6 @@
 <script setup>
 import navItems from '@/navigation/vertical'
-import { useThemeConfig } from '@core/composable/useThemeConfig'
+import { useThemeConfig } from '@/@core/composable/useThemeConfig'
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
@@ -18,7 +18,7 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 // const UserProfile = defineAsyncComponent(() => import('@/layouts/components/UserProfile.vue'))
 
 // @layouts plugin
-import { VerticalNavLayout } from '@layouts'
+import { VerticalNavLayout } from '@/@layouts'
 
 const { appRouteTransition, isLessThanOverlayNavBreakpoint, isVerticalNavCollapsed, isAppRtl } = useThemeConfig()
 const { width: windowWidth } = useWindowSize()

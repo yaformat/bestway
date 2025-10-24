@@ -5,7 +5,7 @@
     "shims.d.js",
     "resources/js/**/*",
     "resources/js/**/*.vue",
-    "themeConfig.js",
+    "resources/js/admin/themeConfig.js",
     "auto-imports.d.js",
     "componenjs.d.js"
   ],
@@ -25,7 +25,7 @@
         "resources/js/*"
       ],
       "@themeConfig": [
-        "themeConfig.js"
+        "resources/js/admin/themeConfig.js"
       ],
       "@layouts/*": [
         "resources/js/@layouts/*"

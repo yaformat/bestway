@@ -1,8 +1,8 @@
 <script setup>
-import { HorizontalNav } from '@layouts/components'
+import { HorizontalNav } from '@/@layouts/components'
 
 // import { useLayouts } from '@layouts'
-import { useLayouts } from '@layouts/composable/useLayouts'
+import { useLayouts } from '@/@layouts/composable/useLayouts'
 
 const props = defineProps({
   navItems: {

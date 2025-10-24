@@ -1,14 +1,14 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\BaseModel;
-use App\Traits\SortOrder;
 
 class BookingPeriod extends BaseModel
 {
-    use HasFactory, SoftDeletes, SortOrder;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'hotel_id',
@@ -16,17 +16,14 @@ class BookingPeriod extends BaseModel
         'start_date',
         'end_date',
         'is_active',
-        'sort_order',
+        'sort_order'
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
         'is_active' => 'boolean',
-    ];
-
-    protected $hidden = [
-        'laravel_through_key',
+        'sort_order' => 'integer'
     ];
 
     public function hotel()
@@ -34,9 +31,14 @@ class BookingPeriod extends BaseModel
         return $this->belongsTo(Hotel::class);
     }
 
-    public function prices()
+    public function roomPrices()
     {
         return $this->hasMany(HotelPrice::class);
+    }
+
+    public function servicePrices()
+    {
+        return $this->hasMany(HotelServicePrice::class);
     }
 
     public function scopeActive($query)
@@ -44,9 +46,8 @@ class BookingPeriod extends BaseModel
         return $query->where('is_active', true);
     }
 
-    public function scopeCurrent($query)
+    public function scopeOrdered($query)
     {
-        return $query->where('start_date', '<=', now())
-                    ->where('end_date', '>=', now());
+        return $query->orderBy('start_date');
     }
 }

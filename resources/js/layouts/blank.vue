@@ -1,5 +1,5 @@
 <script>
-import { useSkins } from '@core/composable/useSkins'
+import { useSkins } from '@/@core/composable/useSkins'
 
 export default defineComponent({
   setup() {

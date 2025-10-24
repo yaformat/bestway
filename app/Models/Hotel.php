@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,12 +17,14 @@ class Hotel extends BaseModel
         'description',
         'direction_id',
         'resort_id',
+        'currency',
+        'hotel_type',
+        'rest_types', // Добавляем поле для хранения JSON массива типов отдыха
         'sort_order',
         'is_active',
         'latitude',
         'longitude',
-        'rating',
-        'stars',
+        'rating'
     ];
 
     protected $casts = [
@@ -29,7 +32,7 @@ class Hotel extends BaseModel
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
         'rating' => 'decimal:2',
-        'stars' => 'integer',
+        'rest_types' => 'array' // Преобразуем JSON в массив
     ];
 
     protected $hidden = [
@@ -51,6 +54,21 @@ class Hotel extends BaseModel
         return $this->hasMany(HotelRoom::class);
     }
 
+    public function buildings()
+    {
+        return $this->hasMany(HotelBuilding::class);
+    }
+
+    public function infoBlocks()
+    {
+        return $this->hasMany(HotelInfoBlock::class);
+    }
+
+    public function services()
+    {
+        return $this->hasMany(HotelService::class);
+    }
+
     public function bookingPeriods()
     {
         return $this->hasMany(BookingPeriod::class);
@@ -59,12 +77,6 @@ class Hotel extends BaseModel
     public function prices()
     {
         return $this->hasManyThrough(HotelPrice::class, HotelRoom::class);
-    }
-
-    // Виды отдыха (через полиморфную связь)
-    public function restTypes()
-    {
-        return $this->morphToMany(RestType::class, 'entity', 'entity_rest_types');
     }
 
     public function scopeActive($query)
@@ -76,5 +88,54 @@ class Hotel extends BaseModel
     public function getMainDirectionAttribute()
     {
         return $this->resort?->direction ?? $this->direction;
+    }
+
+    // Получение типа отеля из конфига
+    public function getHotelTypeInfoAttribute()
+    {
+        return config('hotels.types.' . $this->hotel_type);
+    }
+
+    // Получение типов отдыха из конфига
+    public function getRestTypesInfoAttribute()
+    {
+        if (!$this->rest_types) return collect();
+        
+        return collect($this->rest_types)->map(function($typeId) {
+            return config('hotels.rest_types.' . $typeId);
+        })->filter();
+    }
+
+    // Получение всех цен (номера + услуги)
+    public function getAllPrices()
+    {
+        $roomPrices = $this->prices()->with(['hotelRoom', 'bookingPeriod'])->get();
+        $servicePrices = collect();
+        
+        foreach ($this->services as $service) {
+            $servicePrices = $servicePrices->merge($service->prices()->with(['service', 'bookingPeriod'])->get());
+        }
+        
+        return $roomPrices->merge($servicePrices);
+    }
+
+    // Методы для работы со строениями
+    public function getBuildingsWithRooms()
+    {
+        return $this->buildings()->with(['rooms' => function($query) {
+            $query->active()->with('prices.bookingPeriod');
+        }])->orderBy('sort_order')->get();
+    }
+
+    // Методы для работы с дополнительными услугами
+    public function getServicesWithPrices()
+    {
+        return $this->services()->with(['prices.bookingPeriod'])->orderBy('sort_order')->get();
+    }
+
+    // Методы для работы с информационными блоками
+    public function getInfoBlocksOrdered()
+    {
+        return $this->infoBlocks()->orderBy('sort_order')->get();
     }
 }

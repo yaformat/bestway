@@ -2,7 +2,7 @@
 import {
   HorizontalNavGroup,
   HorizontalNavLink,
-} from '@layouts/components'
+} from '@/@layouts/components'
 
 const props = defineProps({
   navItems: {

@@ -2,7 +2,7 @@
 import {
   avatarText,
   kFormatter,
-} from '@core/utils/formatters'
+} from '@/@core/utils/formatters'
 
 const props = defineProps({
   userData: {

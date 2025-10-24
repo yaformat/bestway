@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Routing\Controller as BaseController;
@@ -10,6 +9,7 @@ use App\Http\Responses\ItemsListBaseResponse;
 use App\Models\Hotel;
 use App\Repositories\HotelRepository;
 use App\Helpers\FilterHelper;
+use App\Helpers\HotelHelper;
 
 class HotelController extends BaseController
 {
@@ -27,10 +27,11 @@ class HotelController extends BaseController
     {
         $parameters = new \App\Utils\ItemsListSearchParameters($request);
         $result = $this->hotelRepository->getHotelsWithRelations($parameters);
+        
         $items = $result->getCollection()->map(function ($item) {
             return (new \App\Http\Responses\HotelElement($item))->toArray();
         });
-        
+
         $response = new ItemsListBaseResponse(
             Hotel::class,
             \App\Presets\Sortings\DefaultSortings::class,
@@ -38,11 +39,11 @@ class HotelController extends BaseController
             $parameters,
             $result
         );
-        
+
         // Получение количества удаленных элементов
         $trashed_count = $this->hotelRepository->trashedCount();
         $response->trashed_count = $trashed_count;
-        
+
         // Устанавливаем фильтры
         $response->setFilters([
             'direction_id' => FilterHelper::createFilter('Направление', 'tree')
@@ -55,22 +56,33 @@ class HotelController extends BaseController
                 ->setMultiple(true)
                 ->setQuickFilter(true)
                 ->toArray(),
-            'stars' => FilterHelper::createFilter('Звездность', 'checkboxes')
-                ->setOptions(FilterHelper::getHotelStarsOptions())
+            'hotel_type' => FilterHelper::createFilter('Тип отеля', 'checkboxes')
+                ->setOptions(HotelHelper::getHotelTypes()->toArray())
                 ->setMultiple(true)
-                ->setQuickFilter(true, true)
+                ->setQuickFilter(true)
+                ->toArray(),
+            'rest_types' => FilterHelper::createFilter('Виды отдыха', 'checkboxes')
+                ->setOptions(HotelHelper::getRestTypes()->toArray())
+                ->setMultiple(true)
+                ->setQuickFilter(true)
                 ->toArray(),
             'rating' => FilterHelper::createFilter('Рейтинг', 'range')
                 ->setRange(0, 5, 0.1)
                 ->setQuickFilter(true)
                 ->toArray(),
-            'price_from' => FilterHelper::createFilter('Цена от', 'range')
-                ->setRange(0, 10000)
+            'currency' => FilterHelper::createFilter('Валюта', 'checkboxes')
+                ->setOptions(HotelHelper::getCurrencies())
+                ->setMultiple(true)
                 ->setQuickFilter(true)
                 ->toArray(),
-            'rest_types' => FilterHelper::createFilter('Виды отдыха', 'checkboxes')
-                ->setOptions(FilterHelper::getRestTypeOptions())
-                ->setMultiple(true)
+            'price_range' => FilterHelper::createFilter('Цена', 'range')
+                ->setRange(0, 50000, 100)
+                ->setQuickFilter(true)
+                ->toArray(),
+            'has_buildings' => FilterHelper::createFilter('Со строениями', 'toggle')
+                ->setQuickFilter(true)
+                ->toArray(),
+            'has_services' => FilterHelper::createFilter('С услугами', 'toggle')
                 ->setQuickFilter(true)
                 ->toArray(),
             'is_active' => FilterHelper::createFilter('Активные', 'toggle')
@@ -82,23 +94,13 @@ class HotelController extends BaseController
             'has_photos' => FilterHelper::createFilter('С фото', 'toggle')
                 ->setQuickFilter(true)
                 ->toArray(),
-            'has_rooms' => FilterHelper::createFilter('С номерами', 'toggle')
-                ->setQuickFilter(true)
-                ->toArray(),
-            'facilities' => FilterHelper::createFilter('Удобства', 'checkboxes')
-                ->setOptions(FilterHelper::getHotelFacilities())
-                ->setMultiple(true)
-                ->setQuickFilter(true)
-                ->toArray(),
         ]);
-        
+
         // Устанавливаем сортировки
         $response->setSortings([
             ['value' => 'default', 'label' => 'По-умолчанию'],
             ['value' => 'name_asc', 'label' => 'По названию (А-Я)'],
             ['value' => 'name_desc', 'label' => 'По названию (Я-А)'],
-            ['value' => 'stars_desc', 'label' => 'По звездности (убыв.)'],
-            ['value' => 'stars_asc', 'label' => 'По звездности (возр.)'],
             ['value' => 'rating_desc', 'label' => 'По рейтингу (убыв.)'],
             ['value' => 'rating_asc', 'label' => 'По рейтингу (возр.)'],
             ['value' => 'price_asc', 'label' => 'По цене (возр.)'],
@@ -107,7 +109,7 @@ class HotelController extends BaseController
             ['value' => 'created_at_asc', 'label' => 'Сначала старые'],
             ['value' => 'sort_order_asc', 'label' => 'По порядку сортировки'],
         ]);
-        
+
         return ApiResponse::success($response);
     }
 
@@ -117,7 +119,7 @@ class HotelController extends BaseController
     public function show($id, Request $request)
     {
         $result = $this->hotelRepository->getHotelWithDetails($id);
-        $response = new \App\Http\Responses\HotelElement($result);
+        $response = new \App\Http\Responses\HotelElementDetails($result);
         return ApiResponse::success($response);
     }
 
@@ -132,12 +134,12 @@ class HotelController extends BaseController
         $referenceData = [
             'directions' => FilterHelper::getDirectionOptionsFlat(),
             'resorts' => FilterHelper::getResortOptions(),
-            'rest_types' => FilterHelper::getRestTypeOptions(),
-            'stars' => FilterHelper::getHotelStarsOptions(),
-            'currencies' => FilterHelper::getCurrencyOptions(),
-            'facilities' => FilterHelper::getHotelFacilities(),
+            'hotel_types' => HotelHelper::getHotelTypesForSelect(),
+            'rest_types' => HotelHelper::getRestTypesForSelect(),
+            'currencies' => HotelHelper::getCurrencies(),
+            'info_blocks' => HotelHelper::getInfoBlocksForForm(),
         ];
-        
+
         // Если редактируем отель, добавляем связанные данные
         if ($hotelId) {
             try {
@@ -149,8 +151,34 @@ class HotelController extends BaseController
                 }
                 
                 // Добавляем связанные данные отеля
-                $referenceData['hotel_rest_types'] = $hotel->restTypes->pluck('id')->toArray();
-                $referenceData['hotel_facilities'] = $hotel->facilities ?? [];
+                $referenceData['hotel_rest_types'] = $hotel->rest_types ?? [];
+                $referenceData['hotel_info_blocks'] = $hotel->infoBlocks->map(function ($block) {
+                    return [
+                        'id' => $block->id,
+                        'key' => $block->block_key,
+                        'content' => $block->content,
+                        'is_active' => $block->is_active,
+                        'sort_order' => $block->sort_order
+                    ];
+                })->toArray();
+                $referenceData['hotel_buildings'] = $hotel->buildings->map(function ($building) {
+                    return [
+                        'id' => $building->id,
+                        'name' => $building->name,
+                        'description' => $building->description,
+                        'is_active' => $building->is_active,
+                        'sort_order' => $building->sort_order
+                    ];
+                })->toArray();
+                $referenceData['hotel_services'] = $hotel->services->map(function ($service) {
+                    return [
+                        'id' => $service->id,
+                        'name' => $service->name,
+                        'description' => $service->description,
+                        'is_active' => $service->is_active,
+                        'sort_order' => $service->sort_order
+                    ];
+                })->toArray();
                 
             } catch (\Exception $e) {
                 // Если отель не найден, возвращаем ошибку
@@ -168,9 +196,11 @@ class HotelController extends BaseController
     {
         $parameters = new \App\Utils\ItemsListSearchParameters($request);
         $result = $this->hotelRepository->searchByDirection($directionId, $parameters);
+        
         $items = $result->getCollection()->map(function ($item) {
             return (new \App\Http\Responses\HotelElement($item))->toArray();
         });
+
         $response = new ItemsListBaseResponse(
             Hotel::class,
             \App\Presets\Sortings\DefaultSortings::class,
@@ -178,6 +208,7 @@ class HotelController extends BaseController
             $parameters,
             $result
         );
+
         return ApiResponse::success($response);
     }
 
@@ -188,9 +219,11 @@ class HotelController extends BaseController
     {
         $parameters = new \App\Utils\ItemsListSearchParameters($request);
         $result = $this->hotelRepository->searchByResort($resortId, $parameters);
+        
         $items = $result->getCollection()->map(function ($item) {
             return (new \App\Http\Responses\HotelElement($item))->toArray();
         });
+
         $response = new ItemsListBaseResponse(
             Hotel::class,
             \App\Presets\Sortings\DefaultSortings::class,
@@ -198,6 +231,7 @@ class HotelController extends BaseController
             $parameters,
             $result
         );
+
         return ApiResponse::success($response);
     }
 
@@ -211,24 +245,20 @@ class HotelController extends BaseController
             'description' => 'nullable|string',
             'direction_id' => 'required|exists:directions,id',
             'resort_id' => 'nullable|exists:resorts,id',
+            'currency' => 'required|string|size:3',
+            'hotel_type' => 'required|string|in:hotel,pension,sanatorium,guest_house,children_camp',
+            'rest_types' => 'nullable|array',
+            'rest_types.*' => 'string|in:family,medical,recreational,sport,excursion,business',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'rating' => 'nullable|numeric|between:0,5',
-            'stars' => 'nullable|integer|between:0,5',
             'is_active' => 'boolean',
-            'rest_types' => 'nullable|array',
-            'rest_types.*' => 'exists:rest_types,id',
             'photo_ids' => 'nullable|array',
             'photo_ids.*' => 'exists:photos,id',
         ]);
 
         $data = $request->all();
         $hotel = $this->hotelRepository->create($data);
-        
-        // Привязываем виды отдыха
-        if (!empty($data['rest_types'])) {
-            $hotel->restTypes()->attach($data['rest_types']);
-        }
         
         return ApiResponse::success($hotel, 'Отель создан', 201);
     }
@@ -243,24 +273,20 @@ class HotelController extends BaseController
             'description' => 'nullable|string',
             'direction_id' => 'required|exists:directions,id',
             'resort_id' => 'nullable|exists:resorts,id',
+            'currency' => 'required|string|size:3',
+            'hotel_type' => 'required|string|in:hotel,pension,sanatorium,guest_house,children_camp',
+            'rest_types' => 'nullable|array',
+            'rest_types.*' => 'string|in:family,medical,recreational,sport,excursion,business',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'rating' => 'nullable|numeric|between:0,5',
-            'stars' => 'nullable|integer|between:0,5',
             'is_active' => 'boolean',
-            'rest_types' => 'nullable|array',
-            'rest_types.*' => 'exists:rest_types,id',
             'photo_ids' => 'nullable|array',
             'photo_ids.*' => 'exists:photos,id',
         ]);
 
         $data = $request->all();
         $hotel = $this->hotelRepository->update($id, $data);
-        
-        // Обновляем виды отдыха
-        if (isset($data['rest_types'])) {
-            $hotel->restTypes()->sync($data['rest_types']);
-        }
         
         return ApiResponse::success($hotel, 'Отель обновлен');
     }
@@ -300,9 +326,13 @@ class HotelController extends BaseController
         
         $newData = ['name' => $request->name];
         $copy = $this->hotelRepository->copy($id, $newData);
+        
         return ApiResponse::success($copy, 'Отель скопирован', 201);
     }
 
+    /**
+     * Изменяет активность отеля
+     */
     public function toggleActive($id, Request $request)
     {
         $result = $this->hotelRepository->toggleActive($id);
@@ -310,5 +340,128 @@ class HotelController extends BaseController
             return ApiResponse::success($result, 'Активность элемента изменена');
         }
         return ApiResponse::error('Action forbidden', 409);
+    }
+
+    /**
+     * Создание или обновление строения
+     */
+    public function saveBuilding(Request $request, $hotelId)
+    {
+        $request->validate([
+            'id' => 'nullable|integer|exists:hotel_buildings,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $data = $request->only(['name', 'description', 'is_active']);
+        $building = $this->hotelRepository->createOrUpdateBuilding($hotelId, $data, $request->input('id'));
+        
+        return ApiResponse::success($building, 'Строение сохранено');
+    }
+
+    /**
+     * Удаление строения
+     */
+    public function deleteBuilding(Request $request, $hotelId, $buildingId)
+    {
+        $result = $this->hotelRepository->deleteBuilding($hotelId, $buildingId);
+        return ApiResponse::success($result, 'Строение удалено');
+    }
+
+    /**
+     * Обновление порядка строений
+     */
+    public function updateBuildingsOrder(Request $request, $hotelId)
+    {
+        $request->validate([
+            'building_ids' => 'required|array',
+            'building_ids.*' => 'integer|exists:hotel_buildings,id'
+        ]);
+
+        $this->hotelRepository->updateBuildingsOrder($hotelId, $request->input('building_ids'));
+        return ApiResponse::success(null, 'Порядок обновлен');
+    }
+
+    /**
+     * Создание или обновление услуги
+     */
+    public function saveService(Request $request, $hotelId)
+    {
+        $request->validate([
+            'id' => 'nullable|integer|exists:hotel_services,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $data = $request->only(['name', 'description', 'is_active']);
+        $service = $this->hotelRepository->createOrUpdateService($hotelId, $data, $request->input('id'));
+        
+        return ApiResponse::success($service, 'Услуга сохранена');
+    }
+
+    /**
+     * Удаление услуги
+     */
+    public function deleteService(Request $request, $hotelId, $serviceId)
+    {
+        $result = $this->hotelRepository->deleteService($hotelId, $serviceId);
+        return ApiResponse::success($result, 'Услуга удалена');
+    }
+
+    /**
+     * Обновление порядка услуг
+     */
+    public function updateServicesOrder(Request $request, $hotelId)
+    {
+        $request->validate([
+            'service_ids' => 'required|array',
+            'service_ids.*' => 'integer|exists:hotel_services,id'
+        ]);
+
+        $this->hotelRepository->updateServicesOrder($hotelId, $request->input('service_ids'));
+        return ApiResponse::success(null, 'Порядок обновлен');
+    }
+
+    /**
+     * Создание или обновление информационного блока
+     */
+    public function saveInfoBlock(Request $request, $hotelId)
+    {
+        $request->validate([
+            'id' => 'nullable|integer|exists:hotel_info_blocks,id',
+            'block_key' => 'required|string|exists:hotels.info_blocks',
+            'content' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $data = $request->only(['block_key', 'content', 'is_active']);
+        $block = $this->hotelRepository->createOrUpdateInfoBlock($hotelId, $data, $request->input('id'));
+        
+        return ApiResponse::success($block, 'Информационный блок сохранен');
+    }
+
+    /**
+     * Удаление информационного блока
+     */
+    public function deleteInfoBlock(Request $request, $hotelId, $blockId)
+    {
+        $result = $this->hotelRepository->deleteInfoBlock($hotelId, $blockId);
+        return ApiResponse::success($result, 'Информационный блок удален');
+    }
+
+    /**
+     * Обновление порядка информационных блоков
+     */
+    public function updateInfoBlocksOrder(Request $request, $hotelId)
+    {
+        $request->validate([
+            'block_ids' => 'required|array',
+            'block_ids.*' => 'integer|exists:hotel_info_blocks,id'
+        ]);
+
+        $this->hotelRepository->updateInfoBlocksOrder($hotelId, $request->input('block_ids'));
+        return ApiResponse::success(null, 'Порядок обновлен');
     }
 }

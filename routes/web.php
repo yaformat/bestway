@@ -20,7 +20,6 @@ Route::get('asdasdasdlokijuhy777', '\Rap2hpoutre\LaravelLogViewer\LogViewerContr
 // })->where('any', '^(?!api).*$');
 
 
-
 Route::middleware([
     // 'web', 
     // 'set.domain'

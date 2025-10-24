@@ -1,6 +1,6 @@
 <script>
-import { useLayouts } from '@layouts'
-import { VerticalNav } from '@layouts/components'
+import { useLayouts } from '@/@layouts'
+import { VerticalNav } from '@/@layouts/components'
 
 export default defineComponent({
   props: {

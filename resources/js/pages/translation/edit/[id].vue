@@ -2,7 +2,7 @@
 import {
   integerValidator,
   requiredValidator,
-} from '@validators'
+} from '@/@core/utils/validators'
 import {useTranslationListStore} from '@/views/translation/useTranslationListStore'
 import router from '@/router'
 

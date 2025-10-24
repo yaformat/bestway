@@ -1,6 +1,6 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import { avatarText } from '@core/utils/formatters'
+import { avatarText } from '@/@core/utils/formatters'
 
 const props = defineProps({
   notifications: {

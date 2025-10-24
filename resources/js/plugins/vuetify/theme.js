@@ -1,4 +1,4 @@
-import { resolveVuetifyTheme } from '@core/utils/vuetify'
+import { resolveVuetifyTheme } from '@/@core/utils/vuetify'
 import { themeConfig } from '@themeConfig'
 
 //export const staticPrimaryColor = '#666CFF'

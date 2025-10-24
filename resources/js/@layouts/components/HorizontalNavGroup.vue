@@ -1,12 +1,12 @@
 <script setup>
-import { useLayouts } from '@layouts'
+import { useLayouts } from '@/@layouts'
 import {
   HorizontalNavLink,
   HorizontalNavPopper,
-} from '@layouts/components'
-import { config } from '@layouts/config'
-import { canViewNavMenuGroup } from '@layouts/plugins/casl'
-import { isNavGroupActive } from '@layouts/utils'
+} from '@/@layouts/components'
+import { config } from '@/@layouts/config'
+import { canViewNavMenuGroup } from '@/@layouts/plugins/casl'
+import { isNavGroupActive } from '@/@layouts/utils'
 
 const props = defineProps({
   item: {

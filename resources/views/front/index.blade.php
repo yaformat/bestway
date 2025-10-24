@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Фронтенд</title>
+    @vite(['resources/css/front.scss', 'resources/js/front/main.js'])
+
+
 </head>
 <body>
     <div id="app">

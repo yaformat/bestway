@@ -2,7 +2,7 @@
 <script setup>
 import {
   requiredValidator,
-} from '@validators'
+} from '@/@core/utils/validators'
 import { useResourceStore } from '@/stores/resourceStore'
 import { useGlobalDataStore } from '@/stores/globalDataStore'
 import { useProductItemStore } from '@/stores/productItemStore'

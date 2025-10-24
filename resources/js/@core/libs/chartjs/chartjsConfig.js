@@ -1,4 +1,4 @@
-import { hexToRgb } from '@layouts/utils'
+import { hexToRgb } from '@/@layouts/utils'
 
 
 // 👉 Colors variables

@@ -4,8 +4,8 @@ import {
   flip,
   shift,
 } from '@floating-ui/dom'
-import { useLayouts } from '@layouts/composable/useLayouts'
-import { config } from '@layouts/config'
+import { useLayouts } from '@/@layouts/composable/useLayouts'
+import { config } from '@/@layouts/config'
 import { themeConfig } from '@themeConfig'
 
 const props = defineProps({

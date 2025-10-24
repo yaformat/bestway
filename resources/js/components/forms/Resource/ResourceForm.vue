@@ -353,7 +353,7 @@ import { useResourceStore } from '@/stores/resourceStore'
 import { useGlobalDataStore } from '@/stores/globalDataStore'
 import { useProductItemStore } from '@/stores/productItemStore'
 import { buildCategoryTree, flattenTreeWithIndent } from '@/utils/treeBuilder'
-import { requiredValidator } from '@validators'
+import { requiredValidator } from '@/@core/utils/validators'
 import router from '@/router'
 
 

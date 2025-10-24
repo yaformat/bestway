@@ -3,7 +3,7 @@ import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import {
   emailValidator,
   requiredValidator,
-} from '@validators'
+} from '@/@core/utils/validators'
 
 const props = defineProps({
   isDrawerOpen: {
